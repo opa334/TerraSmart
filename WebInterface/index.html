@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TerraSmart</title>
+    <script src="assets/dist/js/paho-mqtt.js"></script>
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>--->
+    <link href="assets/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.15.5/dist/sweetalert2.all.min.js"></script>
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+
+    <link href="styles.css" rel="stylesheet">
+  </head>
+  <body>
+
+<header class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-body border-bottom shadow-sm">
+  <p class="h5 my-0 me-md-auto fw-normal">TerraSmart</p>
+</header>
+
+<main class="container">
+  <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-4">TerraSmart Control</h1>
+    <p class="lead">Einfache Kontrolle und Überwachung deines TerraSmarts</p>
+  </div>
+
+  <div class="row row-cols-1 row-cols-md-1 mb-2 text-center">
+    <div class="col">
+      <div class="card mb-4 shadow-sm">
+      <div class="card-header">
+        <h4 class="my-0 fw-normal">Status</h4>
+      </div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col">Temperatur</th>
+            <th scope="col">Luftfeuchtigkeit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Sollwert</th>
+            <td scope="row"><h1 class="card-title pricing-card-title"><p id="temperaturSollwert" style="display:inline">N/A</p> <small class="text-muted">°C</small></h1></td>
+            <td scope="row"><h1 class="card-title pricing-card-title"><p id="luftfeuchtigkeitSollwert" style="display:inline">N/A</p> <small class="text-muted">%</small></h1></td>
+          </tr>
+          <tr>
+            <th scope="row">Istwert</th>
+            <td scope="row"><h1 class="card-title pricing-card-title"><p id="temperaturIstwert" style="display:inline">N/A</p> <small class="text-muted">°C</small></h1></td>
+            <td scope="row"><h1 class="card-title pricing-card-title"><p id="luftfeuchtigkeitIstwert" style="display:inline">N/A</p> <small class="text-muted">%</small></h1></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="card-body">
+        <div class="btn-group d-flex" role="group"></div>
+        <button type="button" data-toggle="collapse" data-target="#collapseSetTemperature" class="btn btn-default btn-outline-secondary">Temperatur ändern</button>
+        <button type="button" data-toggle="collapse" data-target="#collapseSetHumidity" class="btn btn-default btn-outline-secondary">Luftfeuchtigkeit ändern</button>
+
+      </div>
+
+      </div>
+      <div id="accordion" class="col text-center">
+        <div class="collapse multi-collapse" id="collapseSetTemperature" data-parent="#accordion">
+          <div class="card card-body">
+            <div class="row g-3 align-items-center">
+              <div class="col-auto">
+                <label class="col-form-label">Neuer Sollwert für Temperatur: </label>
+              </div>
+              <div class="col-auto">
+                <input type="number" id="inputSetTemperature" class="form-control" aria-describedby="passwordHelpInline">
+              </div>
+              <div class="col-auto">
+                <button type="button" id="buttonSaveTemperature" class="btn btn-default btn-outline-primary">Speichern</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="collapse multi-collapse" id="collapseSetHumidity" data-parent="#accordion">
+          <div class="card card-body">
+            <div class="row g-3 align-items-center">
+              <div class="col-auto">
+                <label class="col-form-label">Neuer Sollwert für Luftfeuchtigkeit: </label>
+              </div>
+              <div class="col-auto">
+                <input type="number" id="inputSetHumidity" class="form-control" aria-describedby="passwordHelpInline">
+              </div>
+              <div class="col-auto">
+                <button type="button" id="buttonSaveHumidity" class="btn btn-default btn-outline-primary">Speichern</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+
+  </body>
+  <script>
+    function setValue(id, value) {
+      document.getElementById(id).textContent = value;
+    }
+
+    const clientId = 'mqttjs_' + Math.random().toString(16).substr(2, 8)
+    client = new Paho.Client("", 9001, clientId);
+
+    client.onConnectionLost = onConnectionLost;
+    client.onMessageArrived = onMessageArrived;
+    client.connect({useSSL: true, timeout: 3, onSuccess:onConnect, userName:'gruppe6', password:''});
+
+    function onConnect() {
+      console.log("onConnect");
+      client.subscribe("ES/WS20/gruppe6/temperature");
+      client.subscribe("ES/WS20/gruppe6/humidity");
+      client.subscribe("ES/WS20/gruppe6/temperature_setpoint");
+      client.subscribe("ES/WS20/gruppe6/humidity_setpoint");
+    }
+
+    function onConnectionLost(responseObject) {
+      if (responseObject.errorCode !== 0) {
+        console.log("onConnectionLost:"+responseObject.errorMessage);
+      }
+    }
+
+    function onMessageArrived(message) {
+
+      if(message.destinationName === "ES/WS20/gruppe6/temperature") {
+        setValue("temperaturIstwert", message.payloadString);
+      } else if(message.destinationName === "ES/WS20/gruppe6/humidity") {
+        setValue("luftfeuchtigkeitIstwert", message.payloadString);
+      } else if(message.destinationName === "ES/WS20/gruppe6/temperature_setpoint") {
+        setValue("temperaturSollwert", message.payloadString);
+      } else if(message.destinationName === "ES/WS20/gruppe6/humidity_setpoint") {
+        setValue("luftfeuchtigkeitSollwert", message.payloadString);
+      }
+      //console.log("message.destinationName: "+ message.destinationName)
+      //console.log("message.payloadString: "+message.payloadString);
+    }
+
+    $("#buttonSaveTemperature").click(function(){
+      settedTemperature = $("#inputSetTemperature").val();
+
+      temperatureMessage = new Paho.Message(settedTemperature == -1 ? "N/A" : String(settedTemperature));
+      temperatureMessage.destinationName = "ES/WS20/gruppe6/set_temperature";
+      client.send(temperatureMessage);
+      Swal.fire(
+        'Gespeichert!',
+        'Die Temperatur passt sich nun den Sollwert an.',
+        'success'
+      );
+      $("#collapseSetTemperature").collapse('hide');
+    });
+    $("#buttonSaveHumidity").click(function(){
+      settedHumidity = $("#inputSetHumidity").val();
+
+      humidityMessage = new Paho.Message(settedHumidity == -1 ? "N/A" : String(settedHumidity));
+      humidityMessage.destinationName = "ES/WS20/gruppe6/set_humidity";
+      client.send(humidityMessage);
+      Swal.fire(
+        'Gespeichert!',
+        'Die Luftfeuchtigkeit passt sich nun den Sollwert an.',
+        'success'
+      );
+      $("#collapseSetHumidity").collapse('hide');
+    });
+
+  </script>
+</html>
